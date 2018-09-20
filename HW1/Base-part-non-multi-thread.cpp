@@ -1,6 +1,6 @@
 #include<iostream>
 #include<cstdlib>
-#include<stdio.h>
+#include<fstream>
 #include<list>
 
 using namespace std;
@@ -15,21 +15,21 @@ typedef struct{
 } customer;
 
 int main(int argc, char *argv[]){
-    FILE *fp = fopen(argv[1], "r");
+    ifstream fin(argv[1]);
     int G, total_customer;
     list<int> cus_in_line;
     list<int>::iterator it;
 
-    fscanf(fp, "%d %d", &G, &total_customer);
+    fin >> G >> total_customer;
     
     customer cus[total_customer];
 
     for(int i = 0; i < total_customer; i++){ // Read input
-        fscanf(fp, "%d %d %d %d", &cus[i].arrive_time, &cus[i].play_round, &cus[i].rest_time, &cus[i].total_round);
+        fin >> cus[i].arrive_time >> cus[i].play_round >> cus[i].rest_time >> cus[i].total_round;
         cus[i].next_play_time = cus[i].arrive_time;
         cus_in_line.push_back(i); // Push everyone in queue
     }
-    fclose(fp);
+    fin.close();
 
     int cus_no_prize = total_customer;
     int G_counter = 0;
