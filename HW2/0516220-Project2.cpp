@@ -1,5 +1,5 @@
-#include <list>
 #include <iostream>
+#include <list>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,7 +24,6 @@ int main(int argc, char *argv[]){
         char *arg[100];
         char *input_cmd = NULL;
         char *user = NULL;
-        // char *other_arg = NULL;
         char input_buf[100] = {'\0'};
         char recv_buf[300] = {'\0'};
         read(STDIN_FILENO, input_buf, 100);
@@ -38,58 +37,44 @@ int main(int argc, char *argv[]){
 
         /* Fetch Command And User From Input */
         char tmp[500] = {'\0'};
-        if(1){                     // If input has more than one argument
-            int arg_cnt = 0;
-            arg[0] = strtok(input_buf, " ");
-            while(arg[arg_cnt] != NULL){
-                arg_cnt++;
-                arg[arg_cnt] = strtok(NULL, " ");
-            }
-            arg_cnt--;
 
-            input_cmd = arg[0];
-            if(arg_cnt > 0)user = arg[1];
-            // input_cmd = strtok(input_buf, " ");                 // Fetch the command eg. register, login, logout, post, etc.
-            // user = strtok(NULL, " ");                           // Fetch <user>
-            // if(strstr(user, "\n") != NULL) user = strtok(user, "\n");   // If input argument only has <user> and delete "\n"
-            // else other_arg = strtok(NULL, "\n");                // If input argument NOT only has <user> and delete "\n"
+        int arg_cnt = 0;
+        arg[0] = strtok(input_buf, " ");
+        while(arg[arg_cnt] != NULL){
+            arg_cnt++;
+            arg[arg_cnt] = strtok(NULL, " ");
+        }
+        arg_cnt--;
 
-            if(strcmp(input_cmd, "register") != 0 && strcmp(input_cmd, "login") != 0 && arg_cnt > 0){  // If the command is NOT "register" and "login" means
-                int find_user = 0;                                                      // second argument must be <user> and must be replaced by token
-                for(list<id_token>::iterator it = login_users.begin(); it != login_users.end(); it++){
-                    if(!strcmp(user, (*it).id)){                // Find tokens that we saved
-                        user = (*it).token;                     // If there's one replace <user> to token
-                        find_user = 1;                          // Flag that we find <user> is in the token list (also means that he is already login)
-                        break;
-                    }
-                }
-                if(!find_user) user = (char*)"\0";               // If the token list doesn't have this <user> means he isn't login, leave <user> empty
-            }
+        input_cmd = arg[0];
+        if(arg_cnt > 0)user = arg[1];
 
-            if(arg_cnt == 0){
-                strcat(tmp, input_cmd);
-            }else if(arg_cnt == 1){
-                strcat(tmp, input_cmd);
-                strcat(tmp, " ");
-                strcat(tmp, user);
-            }else if(arg_cnt > 1){
-                strcat(tmp, input_cmd);
-                strcat(tmp, " ");
-                strcat(tmp, user);
-                for(int i = 2; i <= arg_cnt; i++){
-                    strcat(tmp, " ");
-                    strcat(tmp, arg[i]);
+        if(strcmp(input_cmd, "register") != 0 && strcmp(input_cmd, "login") != 0 && arg_cnt > 0){   // If the command is NOT "register" and "login" means
+            int find_user = 0;                                                                      // second argument must be <user> and must be replaced by token
+            for(list<id_token>::iterator it = login_users.begin(); it != login_users.end(); it++){
+                if(!strcmp(user, (*it).id)){                // Find tokens that we saved
+                    user = (*it).token;                     // If there's one replace <user> to token
+                    find_user = 1;                          // Flag that we find <user> is in the token list (also means that he is already login)
+                    break;
                 }
             }
-            // if(other_arg == NULL){                              // Combine the inputs together and save into tmp
-            //     snprintf(tmp, sizeof(tmp), "%s %s", input_cmd, user);               // If inputs only have cmd & <user>
-            // }else{
-            //     snprintf(tmp, sizeof(tmp), "%s %s %s", input_cmd, user, other_arg); // If inputs have cmd, <user>, and other arguments
-            // }
-        }else{                                                  // If input has just one argument
-            // strtok(input_buf, "\n");                            // Delete "\n"
-            strcpy(tmp, input_buf);                             // Save into tmp
+            if(!find_user) user = (char*)"\0";              // If the token list doesn't have this <user> means he isn't login, leave <user> empty
+        }
 
+        if(arg_cnt == 0){
+            strcat(tmp, input_cmd);
+        }else if(arg_cnt == 1){
+            strcat(tmp, input_cmd);
+            strcat(tmp, " ");
+            strcat(tmp, user);
+        }else if(arg_cnt > 1){
+            strcat(tmp, input_cmd);
+            strcat(tmp, " ");
+            strcat(tmp, user);
+            for(int i = 2; i <= arg_cnt; i++){
+                strcat(tmp, " ");
+                strcat(tmp, arg[i]);
+            }
         }
         char send_msg[strlen(tmp)] = {'\0'};                    // Declare send_msg (It's the string that we'll send to server)
         strcpy(send_msg, tmp);                                  // Copy tmp to send_msg
@@ -137,10 +122,10 @@ int main(int argc, char *argv[]){
         message = json_object_object_get(root, "message");
 
         if(invite != NULL && !strcmp(input_cmd, "list-invite") && json_object_get_int(status) == 0){
-                int arraylen = json_object_array_length(invite);
-                for(int i = 0; i < arraylen; i++){
-                    printf("%s\n", json_object_get_string(json_object_array_get_idx(invite, i)));
-                }
+            int arraylen = json_object_array_length(invite);
+            for(int i = 0; i < arraylen; i++){
+                printf("%s\n", json_object_get_string(json_object_array_get_idx(invite, i)));
+            }
             if(arraylen == 0) printf("No invitation\n");
         }else if(my_friend != NULL && !strcmp(input_cmd, "list-friend") && json_object_get_int(status) == 0){
             int arraylen = json_object_array_length(my_friend);
@@ -164,7 +149,7 @@ int main(int argc, char *argv[]){
                 strcpy(new_item.token, json_object_get_string(token));
                 login_users.push_back(new_item);
             }
-            if(!strcmp(input_cmd, "logout") && json_object_get_int(status) == 0){
+            if((!strcmp(input_cmd, "logout")) || (!strcmp(input_cmd, "delete")) && json_object_get_int(status) == 0){
                 for(list<id_token>::iterator it = login_users.begin(); it != login_users.end(); it++){
                     if(!strcmp(user, (*it).token)){
                         login_users.erase(it);
