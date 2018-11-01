@@ -149,7 +149,7 @@ int main(int argc, char *argv[]){
                 strcpy(new_item.token, json_object_get_string(token));
                 login_users.push_back(new_item);
             }
-            if((!strcmp(input_cmd, "logout")) || (!strcmp(input_cmd, "delete")) && json_object_get_int(status) == 0){
+            if(((!strcmp(input_cmd, "logout")) || (!strcmp(input_cmd, "delete"))) && json_object_get_int(status) == 0){
                 for(list<id_token>::iterator it = login_users.begin(); it != login_users.end(); it++){
                     if(!strcmp(user, (*it).token)){
                         login_users.erase(it);
