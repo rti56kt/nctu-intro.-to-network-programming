@@ -160,6 +160,6 @@ int main(int argc, char *argv[]){
             printf("%s\n", json_object_get_string(message));
         }
     }
-
+    
     return 0;
 }
