@@ -26,7 +26,7 @@ int main(int argc, char *argv[]){
         char *user = NULL;
         char input_buf[100] = {'\0'};
         char recv_buf[300] = {'\0'};
-        read(STDIN_FILENO, input_buf, 100);
+        fgets(input_buf, 100, stdin);
         strtok(input_buf, "\n");
 
         /* Delete Saved Tokens And Exit The Program. */
