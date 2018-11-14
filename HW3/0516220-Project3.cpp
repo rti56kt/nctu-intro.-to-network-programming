@@ -150,15 +150,19 @@ string Command_Case(int arg_cnt){
             if(Validate_Token(db, user) == false)
                 send_buf = "{\n\"status\":1,\n\"message\":\"Not login yet\"\n}";
             else{
-                sqlite3_stmt *stmt = NULL;
-                string sql;
-                sql = "DELETE FROM Users WHERE id=(SELECT userID FROM ValidTokens WHERE token=?);";
-                if(sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL) == SQLITE_OK){
-                    sqlite3_bind_text(stmt, 1, user.c_str(), -1, NULL);
-                    if(sqlite3_step(stmt) == SQLITE_DONE)
-                        send_buf = "{\n\"status\":0,\n\"message\":\"Success!\"\n}";
+                if(arg_cnt > 1)
+                    send_buf = "{\n\"status\":1,\n\"message\":\"Usage: delete <user>\"\n}";
+                else{
+                    sqlite3_stmt *stmt = NULL;
+                    string sql;
+                    sql = "DELETE FROM Users WHERE id=(SELECT userID FROM ValidTokens WHERE token=?);";
+                    if(sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL) == SQLITE_OK){
+                        sqlite3_bind_text(stmt, 1, user.c_str(), -1, NULL);
+                        if(sqlite3_step(stmt) == SQLITE_DONE)
+                            send_buf = "{\n\"status\":0,\n\"message\":\"Success!\"\n}";
+                    }
+                    sqlite3_finalize(stmt);
                 }
-                sqlite3_finalize(stmt);
             }
         }
     }else if(input_cmd == "logout"){
@@ -282,7 +286,8 @@ string Command_Case(int arg_cnt){
                     sqlite3_stmt *stmt = NULL;
                     string sql;
                     sql = "SELECT user FROM Users INNER JOIN Invites ON Invites.inviterID=Users.id WHERE inviteeID="
-                            "(SELECT id FROM Users WHERE id=(SELECT userID FROM ValidTokens WHERE token=?));";
+                            "(SELECT id FROM Users WHERE id=(SELECT userID FROM ValidTokens WHERE token=?))"
+                            "ORDER BY Invites.No ASC;";
                     if(sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL) == SQLITE_OK){
                         sqlite3_bind_text(stmt, 1, user.c_str(), -1, NULL);
                         send_buf = "{\n\"status\":0,\n\"invite\":[";
@@ -379,7 +384,8 @@ string Command_Case(int arg_cnt){
                     sqlite3_stmt *stmt = NULL;
                     string sql;
                     sql = "SELECT user FROM Users INNER JOIN Friends ON Friends.friendBID=Users.id WHERE friendAID="
-                            "(SELECT id FROM Users WHERE id=(SELECT userID FROM ValidTokens WHERE token=?));";
+                            "(SELECT id FROM Users WHERE id=(SELECT userID FROM ValidTokens WHERE token=?)) "
+                            "ORDER BY Friends.No ASC;";
                     if(sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL) == SQLITE_OK){
                         sqlite3_bind_text(stmt, 1, user.c_str(), -1, NULL);
                         send_buf = "{\n\"status\":0,\n\"friend\":[";
@@ -436,7 +442,7 @@ string Command_Case(int arg_cnt){
                     string sql;
                     sql = "SELECT user, message FROM Users INNER JOIN Posts ON poster=id "
                             "INNER JOIN Friends ON friendBID=id WHERE friendAID="
-                            "(SELECT userID FROM ValidTokens WHERE token=?);";
+                            "(SELECT userID FROM ValidTokens WHERE token=?) ORDER BY Posts.No ASC;";
                     if(sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL) == SQLITE_OK){
                         sqlite3_bind_text(stmt, 1, user.c_str(), -1, NULL);
                         send_buf = "{\n\"status\":0,\n\"post\":[";
@@ -461,6 +467,8 @@ string Command_Case(int arg_cnt){
                 }
             }
         }
+    }else{
+        send_buf = "{\n\"status\":1,\n\"message\":\"Unknown command " + input_cmd + "\"\n}";
     }
     sqlite3_close(db);
     return send_buf;
