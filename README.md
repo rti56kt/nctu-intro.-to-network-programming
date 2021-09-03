@@ -1,5 +1,6 @@
-# NP-HW
-Network Programming Project
+# NCTU Introduction to Network Programming
+
+[Fall'18] NCTU CS - Introduction to Network Programming Projects
 
 A project based on Python that allows users to interact with other users.
 
